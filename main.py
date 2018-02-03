@@ -23,7 +23,7 @@ window_width = 1280
 window_height = 720
 gda = gltools.create_drawning_area(window_width, window_height)
 
-# Пути к файлам программы
+# Интерфейс
 ui = uictl.UiCtl(gda, 'data')
 
 # Процедуры-обработчики инициализации, перерисовки и завершения
