@@ -34,7 +34,7 @@ gda.connect('expose-event', callbacks.on_expose_event, ui)
 main_window = gtk.Window()
 main_window.set_reallocate_redraws(True)
 main_window.connect('delete-event', gtk.main_quit)
-main_window.set_title('П16')
+main_window.set_title('GTKLUI - Example')
 
 # Расположение в окне
 vbox = gtk.VBox()
