@@ -47,6 +47,7 @@ vbox = gtk.VBox()
 main_window.add(vbox)
 vbox.pack_start(gda)
 
+
 # Установка положения окна
 main_window.show_all()
 
