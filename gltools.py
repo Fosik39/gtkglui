@@ -21,10 +21,9 @@ import colors
 pygtk.require('2.0')
 
 __textures__ = None
-
 __flash_phase__ = 0
 flash_alpha = 100
-
+__ehid__ = None
 
 def step_flash():
     global __flash_phase__, flash_alpha
@@ -135,7 +134,8 @@ def draw_table2(pos, head, lines, font, color_proc, cws, i_cur=None, line_width=
         col = color_proc(cx, cy)  # Выбор цвета для ячейки
         text_width = font.get_text_width(str0)  # Горизонтальное выравнивание по центру ячейки
         dx = (cws_x - text_width) >> 1
-        if dx < 0: dx = 0
+        if dx < 0:
+            dx = 0
         font.draw_text((x + line_width + dx, y + row_height + line_width), str0, col)
         cx += 1
         x += cws_x
@@ -224,9 +224,9 @@ def draw_table_borders(pos, cws, rh, rn, lw):
     draw_line((pos[0], y), (x, y), colors.TABLE_LINES, lw)
 
 
-def opengl_init(drawing_area):
+def init(drawing_area):
     global __cis0__, __parent_height__, __cairo_texts__, __textures_ids__, \
-        __cairo_texts_len_max__, __glyph_widths__, __textures__
+        __cairo_texts_len_max__, __glyph_widths__, __textures__, __ehid__
     __cis0__ = cairo.ImageSurface(cairo.FORMAT_ARGB32, drawing_area.allocation.width, drawing_area.allocation.height)
     __parent_height__ = drawing_area.allocation.height
     __cairo_texts__ = dict()

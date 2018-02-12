@@ -13,6 +13,7 @@ import callbacks
 import gltools
 import glwidgets
 import uictl
+import tools
 
 # Переопределить поведение pygtk своей процедурой для того, что бы
 # программа закрывалась при возникновении исключения.
@@ -24,11 +25,14 @@ window_height = 720
 gda = gltools.create_drawning_area(window_width, window_height)
 
 # Интерфейс
-ui = uictl.UiCtl(gda, 'data')
+ui = uictl.UiCtl(gda, 'data')  # 'data' - путь к папке с медиафайлами
+
+# Определяемая пользователем часть
+user_module = tools.load_module('module0', 'mods')  # 'mods' - путь к папке с модулями пользователя
 
 # Процедуры-обработчики инициализации, перерисовки и завершения
-gda.connect_after('realize', callbacks.on_realize, ui)
-gda.connect('expose-event', callbacks.on_expose_event, ui)
+gda.connect_after('realize', callbacks.on_realize, ui, user_module)
+gda.connect('expose-event', callbacks.on_expose_event, ui, user_module)
 
 # Окно и главный цикл
 main_window = gtk.Window()
@@ -36,25 +40,19 @@ main_window.set_reallocate_redraws(True)
 main_window.connect('delete-event', gtk.main_quit)
 main_window.set_title('GTKGLUI - Example')
 
+main_window.connect('key-press-event', glwidgets.key_dispatcher)
+
 # Расположение в окне
 vbox = gtk.VBox()
 main_window.add(vbox)
 vbox.pack_start(gda)
 
-# Глобальные обработчики клавиш. Один обработчик для всех клавиш, глобальный
-key_callbacks = dict()  # Словарь клавиш и соответсвующих им процедур
-key_callbacks['Escape'] = callbacks.on_escape_key, 'Нормальное завершение', ui
-key_callbacks['q'] = callbacks.on_debug_key, ui
-main_window.connect('key-press-event', callbacks.on_key_press, key_callbacks)
-glwidgets.init(main_window)
-
 # Установка положения окна
-main_window.move(0, 0)
 main_window.show_all()
 
 # Таймер перерисовки окна, для анимации
 redraw_rate = 20
-glib.timeout_add(redraw_rate, callbacks.on_timer_tick, gda, ui)
+glib.timeout_add(redraw_rate, callbacks.on_timer_tick, gda, ui, user_module)
 
 # Вход в главный цикл
 gtk.main()

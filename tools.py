@@ -133,7 +133,9 @@ def load_module(name, dir_name=None):
         fp, pathname, description = imp.find_module(name)
     else:
         fp, pathname, description = imp.find_module(name, [dir_name])
-    return imp.load_module(name, fp, pathname, description)
+    module = imp.load_module(name, fp, pathname, description)
+    fp.close()
+    return module
 
 
 def set_wordi(buf, index, val):

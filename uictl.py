@@ -19,23 +19,6 @@ import gltools
 import glwidgets
 
 
-def init(ui):
-    assert type(ui) is UiCtl
-    ui.dl = glGenLists(1)
-    assert glIsList(ui.dl)
-
-
-def map_xy_to_ang(x, y, x0, y0):
-    xf, yf = x - x0, y - y0
-    p = (math.atan2(yf, xf) * 180.0) / math.pi
-    p += 90.0
-    if p < 0.0:
-        p += 360.0
-    if p > 360.0:
-        p -= 360.0
-    return p
-
-
 class UiCtl(object):
     """
     Хранилище элементов экрана
@@ -49,10 +32,28 @@ class UiCtl(object):
         self.textures = dict()
         self.fonts = dict()
         self.mouse_pos = (0, 0)
-        self.dl = glGenLists(1)
-        self.show_items = dict()
         self.events = dict()  # Свои события
         self.time_now = datetime.now()
+
+    def on_expose_event(self, event):
+        # Все управляемые элементы, компиляция в один display list
+        if glwidgets.GlWidget.force_redraw:
+            glNewList(self.dl, GL_COMPILE)
+            for item in self.scene:
+                item.draw()
+            glEndList()
+            glwidgets.GlWidget.force_redraw = False
+
+        # Все управляемые элементы, рисование display list
+        glCallList(self.dl)
+
+        # Пользовательские процедуры рисования
+        for item in self.draw_callbacks:
+            item[0](self, *item[1])
+
+    def init(self):
+        self.dl = glGenLists(1)
+        assert glIsList(self.dl)
 
     def get_tick(self):
         """
