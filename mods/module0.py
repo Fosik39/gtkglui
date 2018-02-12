@@ -6,8 +6,8 @@ def init(*args):
 
 
 def on_realize(ui):
-    txr0 = ui.get_texture('0000000000.bmp')
-    btn = glwidgets.Button(ui.drawing_area, (100, 100), 'ASDFG', txr0)
+    txrs = ui.get_textures('btn%u.png', 2)
+    btn = glwidgets.Button(ui.drawing_area, (100, 100), 'Button', txrs, check_part=(0.25, 0.5))
     btn.show()
     ui.scene.append(btn)
 
