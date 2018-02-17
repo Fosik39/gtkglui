@@ -20,13 +20,19 @@ def on_realize(ui):
     btn1.show()
     ui.scene.append(btn1)
 
-    headers = ('Name', 'Age')
-    rows = ('Bobby', '78'), ('Karl', '12'), ('Moony', '15')
-    tbl1 = glwidgets.Table(ui.gda)
+    rows = [['  Name  ', ' Age '], ['Bobby', '78'], ['Carl', '12'], ['Moony', '15']]
+    tbl1 = glwidgets.Table(ui.gda, (220, 100), rows)
+    tbl1.show()
+    ui.scene.append(tbl1)
 
 
 def on_btn1_clicked(btn1):
-    print 'on_btn1_clicked(): btn.text:%s btn1.state:%u' % (btn1.text, btn1.state)
+    """
+    'Button1' click handler. Try to do something here
+    :param btn1:
+    :return:
+    """
+    print 'on_btn1_clicked(): btn1.text:%s btn1.state:%u' % (btn1.text, btn1.state)
 
 
 def on_key_callback(*args):

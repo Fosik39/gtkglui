@@ -12,7 +12,7 @@ import uictl
 # 'data' - folder with image files
 # 'custom' - Python file-user-defined module: custom.py
 # Look in 'custom.py' how to add your widgets and everything else
-ui = uictl.UiCtl(1280, 720, 'data', 'custom')
+ui = uictl.UiCtl(640, 480, 'data', 'custom')
 
 # Main loop
 ui.main()
