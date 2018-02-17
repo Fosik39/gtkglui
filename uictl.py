@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Управление виджетами
+
 
 # Чужие модули
 import os
@@ -21,9 +21,10 @@ import glwidgets
 import tools
 import callbacks
 
+
 class UiCtl(object):
     """
-    Хранилище элементов экрана
+    Управление виджетами
     """
     def __init__(self, width, hight, data_path, module_path):
         self.gda = gltools.create_drawning_area(width, hight)
@@ -40,19 +41,19 @@ class UiCtl(object):
         self.gda.connect_after('realize', callbacks.on_realize, self, user_module)
         self.gda.connect('expose-event', callbacks.on_expose_event, self, user_module)
         # Окно и главный цикл
-        main_window = gtk.Window()
-        main_window.set_reallocate_redraws(True)
-        main_window.connect('delete-event', gtk.main_quit)
-        main_window.set_title('GTKGLUI - Example')
-        main_window.connect('key-press-event', glwidgets.key_dispatcher)
-        main_window.connect('key-press-event',  callbacks.on_key_callback, self, user_module)
+        self.main_window = gtk.Window()
+        self.main_window.set_reallocate_redraws(True)
+        self.main_window.connect('delete-event', gtk.main_quit)
+        self.main_window.set_title('GTKGLUI - Example')
+        self.main_window.connect('key-press-event', glwidgets.key_dispatcher)
+        self.main_window.connect('key-press-event',  callbacks.on_key_callback, self, user_module)
         glib.timeout_add(25, callbacks.on_timer_tick, self, user_module)
 
         # Расположение в окне
         vbox = gtk.VBox()
-        main_window.add(vbox)
+        self.main_window.add(vbox)
         vbox.pack_start(self.gda)
-        main_window.show_all()
+        self.main_window.show_all()
         self.main = gtk.main
 
 

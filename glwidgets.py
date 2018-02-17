@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Виджеты для OpenGL
+
+# Виджеты для OpenGL+GTK
 
 # Чужие модули
 import gtk
