@@ -8,20 +8,21 @@ import glwidgets
 import gltools
 
 
-def init(*args):
-    pass
-
 
 def on_realize(ui):
     """
-    Is called during initialization. Create widgets here
+    Is called during initialization. Create widgets *here only*
     :param ui:
-    :return:
+    :return: None
     """
     txrs = ui.get_textures('btn%u.png', 2)  # 'btn0.png', 'btn1.png'
     btn1 = glwidgets.Button(ui.gda, (220, 10), 'Button1', txrs, user_proc=on_btn1_clicked, check_part=(0.25, 0.5))
     btn1.show()
     ui.scene.append(btn1)
+
+    headers = ('Name', 'Age')
+    rows = ('Bobby', '78'), ('Karl', '12'), ('Moony', '15')
+    tbl1 = glwidgets.Table(ui.gda)
 
 
 def on_btn1_clicked(btn1):
@@ -41,7 +42,7 @@ def on_key_callback(*args):
 def on_expose(*args):
     """
     Is called to redraw the window. Add the
-    drawing code uses OpenGL API here. This
+    drawing code that uses OpenGL API here. This
     callback is assigned to custom draw purpose,
     if you *really* need it.
     :param args:

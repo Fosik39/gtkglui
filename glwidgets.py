@@ -270,10 +270,10 @@ class StaticText(GlWidget):
     Выводит текст на экран. Текст может содержать перевод строки
     """
 
-    def __init__(self, drawing_area, pos=(0, 0), text='', font=None, user_data=None, color=colors.GRID):
+    def __init__(self, gda, pos=(0, 0), text='', font=None, user_data=None, color=colors.GRID):
         self.draw = self.__draw_list__
         self.pos = pos
-        self.parent_height = drawing_area.allocation.height
+        self.parent_height = gda.allocation.height
         self.dl = glGenLists(1)
         self.text = text
         self.color = color
@@ -296,8 +296,8 @@ class StaticText(GlWidget):
 
 
 class Picture(GlWidget):
-    def __init__(self, drawing_area, pos, texture, scale=[1.0, 1.0, 1.0], color=colors.WHITE, user_data=None):
-        assert type(drawing_area) is gtk.DrawingArea
+    def __init__(self, gda, pos, texture, scale=[1.0, 1.0, 1.0], color=colors.WHITE, user_data=None):
+        assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert l_len(pos) == 2
         assert type(pos[0]) is int
@@ -318,12 +318,6 @@ class Picture(GlWidget):
         assert glIsList(self.dl)
         self.scale = scale
         self.color = color
-
-        # assert type(texture) is tuple #) or (type(texture) is str)
-        # assert l_len(texture) == 3  # Должны быть: ид-текстуры, ширина, высота
-        # assert glIsTexture(texture[0])  # Должен быть действительный идентификатор текстуры. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
-        # assert type(texture[1] is int)  # Должна быть ширина, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
-        # assert type(texture[2] is int)  # Должна быть высота, целое. Формат: (идентификатор текстуры openGL, ширина int, высота int), (,,))
 
         self.texture = texture
 
@@ -368,10 +362,10 @@ class PictureState(Picture):
 
 
 class Entry(GlWidget):
-    def __init__(self, drawing_area, pos, text=' ', size=(150, 17), font_name=DEFAULT_FONT_FACE,
+    def __init__(self, gda, pos, text=' ', size=(150, 17), font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE,
                  text_color=(255, 255, 255, 127), bg_color=(255, 127, 127, 255)):
-        assert type(drawing_area) is gtk.DrawingArea
+        assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert l_len(pos) == 2
         assert type(size) is tuple
@@ -384,8 +378,8 @@ class Entry(GlWidget):
         assert l_len(bg_color) == 4
 
         self.draw = self.__draw_list__
-        self.drawing_area = drawing_area
-        self.ancestor = self.drawing_area.get_ancestor(gtk.Window)
+        self.gda = gda
+        self.ancestor = self.gda.get_ancestor(gtk.Window)
         self.font_name = font_name
         self.font_size = font_size
         self.text_color = text_color
@@ -397,7 +391,7 @@ class Entry(GlWidget):
         self.dl = glGenLists(1)
         self.ehid0 = None
         self.ehid1 = None
-        self.ehid2 = self.drawing_area.connect('button_press_event', self.on_button_press)
+        self.ehid2 = self.gda.connect('button_press_event', self.on_button_press)
         self.timer_id = None
         self.connect()
         self.cover = False
@@ -516,7 +510,7 @@ class Entry(GlWidget):
 
     def connect(self):
         if self.ehid0 is None:
-            self.ehid0 = self.drawing_area.connect('motion_notify_event', self.__motion_notify__)
+            self.ehid0 = self.gda.connect('motion_notify_event', self.__motion_notify__)
         connect_key_handler(self.__on_key_press__)
         if self.timer_id is None:
             self.timer_id = glib.timeout_add(150, self.on_timer)
@@ -526,7 +520,7 @@ class Entry(GlWidget):
     def disconnect(self):
         disconnect_key_hadler()
         if self.ehid0:
-            self.drawing_area.disconnect(self.ehid0)
+            self.gda.disconnect(self.ehid0)
             self.ehid0 = None
         if self.ehid1:
             self.ehid1 = None
@@ -561,7 +555,7 @@ class Button(GlWidget):
         assert type(auto) is int
 
         self.draw = self.__draw_list__
-        self.drawing_area = gda
+        self.gda = gda
 
         self.pos = pos
 
@@ -631,18 +625,18 @@ class Button(GlWidget):
         self.text_height = DEFAULT_FONT_SIZE
 
     def connect(self):
-        self.ehid0 = self.drawing_area.connect('motion-notify-event', self.__motion_notify__)
-        self.ehid1 = self.drawing_area.connect('button-release-event', self.button_release)
-        self.ehid2 = self.drawing_area.connect('button-press-event', self.button_press)
+        self.ehid0 = self.gda.connect('motion-notify-event', self.__motion_notify__)
+        self.ehid1 = self.gda.connect('button-release-event', self.button_release)
+        self.ehid2 = self.gda.connect('button-press-event', self.button_press)
 
     def button_press(self, *args):
         self.pressed = self.cover
         Button.pressed = True
 
     def disconnect(self):
-        self.drawing_area.disconnect(self.ehid0)
-        self.drawing_area.disconnect(self.ehid1)
-        self.drawing_area.disconnect(self.ehid2)
+        self.gda.disconnect(self.ehid0)
+        self.gda.disconnect(self.ehid1)
+        self.gda.disconnect(self.ehid2)
         if self.idts is not None:
             glib.source_remove(self.idts)
 
@@ -927,9 +921,9 @@ class Table(GlWidget):
             return colors.TABLE_TEXT
         return colors.SAND
 
-    def __init__(self, drawning_area, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE, font_size=DEFAULT_FONT_SIZE,
+    def __init__(self, gda, pos, rows, view_max=5, font_name=DEFAULT_FONT_FACE, font_size=DEFAULT_FONT_SIZE,
                  column_width_proc=None):
-        assert type(drawning_area) is gtk.DrawingArea
+        assert type(gda) is gtk.DrawingArea
         assert type(rows) is list
         assert l_len(rows) > 0
         assert l_len(rows[0]) > 0
@@ -938,7 +932,7 @@ class Table(GlWidget):
         self.ehid2 = None
 
         self.draw = self.__draw_list__
-        self.drawing_area = drawning_area
+        self.gda = gda
         self.pos = pos
         self.line_width = 2
 
@@ -965,7 +959,7 @@ class Table(GlWidget):
         self.set_rows(rows)
         self.i_cur_column = 0
         self.edit_proc = Table.edit_proc_default  # Процедура проверяющая резрешение редактирования ячейки
-        self.entry = Entry(drawning_area, self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
+        self.entry = Entry(gda, self.pos, '', (100, 20))  # Поле ввода. Используется для редактирования ячеек
         self.entry.hide()
         self.entry.font = self.font
         self.entry.on_edit_done = self.__on_edit_done__
@@ -1166,12 +1160,12 @@ class Table(GlWidget):
 
     def connect(self):
         if self.ehid1 is None:
-            self.ehid1 = self.drawing_area.connect('button-press-event', self.__on_mbutton_press__)
+            self.ehid1 = self.gda.connect('button-press-event', self.__on_mbutton_press__)
         connect_key_handler(self.__on_key_press__)
 
     def disconnect(self):
         if self.ehid1 is not None:
-            self.drawing_area.disconnect(self.ehid1)
+            self.gda.disconnect(self.ehid1)
             self.ehid1 = None
         if self.ehid2:
             self.ehid2 = None

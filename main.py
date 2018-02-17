@@ -17,4 +17,3 @@ ui = uictl.UiCtl(1280, 720, 'data', 'custom')
 # Main loop
 ui.main()
 
-quit(0)
