@@ -8,13 +8,14 @@ import glwidgets
 import gltools
 
 
-
 def on_realize(ui):
     """
     Is called during initialization. Create widgets *here only*
     :param ui:
     :return: None
     """
+    # Загрузить текстуры. Количество текстур равно количеству
+    # состояний кнопки. Поле Button.state хранит текущее состояие кнопки
     txrs = ui.get_textures('btn%u.png', 2)  # 'btn0.png', 'btn1.png'
     btn1 = glwidgets.Button(ui.gda, (220, 10), 'Button1', txrs, user_proc=on_btn1_clicked, check_part=(0.25, 0.5))
     btn1.show()
@@ -24,6 +25,9 @@ def on_realize(ui):
     tbl1 = glwidgets.Table(ui.gda, (220, 100), rows)
     tbl1.show()
     ui.scene.append(tbl1)
+
+    # Also, instead of using ui.scene.append(), you can add new items
+    # to the scene with this maner: ui.scene += [btn1, tbl1]
 
 
 def on_btn1_clicked(btn1):
