@@ -5,10 +5,11 @@
 
 # Чужие модули
 import os
-import OpenGL
 import inspect
-import math
+import gtk
+import glib
 
+import OpenGL
 OpenGL.ERROR_CHECKING = False
 OpenGL.ERROR_LOGGING = False
 from OpenGL.GL import *
@@ -17,23 +18,43 @@ from datetime import datetime
 # Свои модули
 import gltools
 import glwidgets
-
+import tools
+import callbacks
 
 class UiCtl(object):
     """
     Хранилище элементов экрана
     """
-
-    def __init__(self, drawing_area, data_path='data'):
+    def __init__(self, width, hight, data_path, module_path):
+        self.gda = gltools.create_drawning_area(width, hight)
         self.scene = list()
-        self.drawing_area = drawing_area
         self.data_path = data_path
         self.draw_callbacks = list()
         self.textures = dict()
         self.fonts = dict()
-        self.mouse_pos = (0, 0)
+        self.mouse_pos = [0, 0]
         self.events = dict()  # Свои события
         self.time_now = datetime.now()
+        user_module = tools.load_module(module_path)
+        # Процедуры-обработчики инициализации, перерисовки и завершения
+        self.gda.connect_after('realize', callbacks.on_realize, self, user_module)
+        self.gda.connect('expose-event', callbacks.on_expose_event, self, user_module)
+        # Окно и главный цикл
+        main_window = gtk.Window()
+        main_window.set_reallocate_redraws(True)
+        main_window.connect('delete-event', gtk.main_quit)
+        main_window.set_title('GTKGLUI - Example')
+        main_window.connect('key-press-event', glwidgets.key_dispatcher)
+        main_window.connect('key-press-event',  callbacks.on_key_callback, self, user_module)
+        glib.timeout_add(25, callbacks.on_timer_tick, self, user_module)
+
+        # Расположение в окне
+        vbox = gtk.VBox()
+        main_window.add(vbox)
+        vbox.pack_start(self.gda)
+        main_window.show_all()
+        self.main = gtk.main
+
 
     def on_expose_event(self, event):
         # Все управляемые элементы, компиляция в один display list
@@ -164,7 +185,8 @@ class UiCtl(object):
             glwidgets.GlWidget.force_redraw = False
 
     def __motion_notify__(self, drawing_area, event):
-        self.mouse_pos = (event.x, event.y)
+        self.mouse_pos[0] = event.x
+        self.mouse_pos[1] = event.y
         return False
 
     def get_texture(self, path):

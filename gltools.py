@@ -10,6 +10,7 @@ import pygtk
 import gtk
 import gtk.gdkgl
 import OpenGL
+import sys
 
 OpenGL.ERROR_CHECKING = False
 OpenGL.ERROR_LOGGING = False
@@ -297,18 +298,31 @@ def draw_sector(pointsIn, pointsOut, color):
         i += 1
 
 
+def exception_hook(etype, evalue, etb):
+    saved_exception_hook(etype, evalue, etb)
+    print '%s:\n- Завершено из за возникновения исключения.' % __file__
+    quit(1)
+
+
 def create_drawning_area(width, height):
+    # Переопределить поведение pygtk своей процедурой для того, что бы
+    # программа закрывалась при возникновении исключения.
+    global saved_exception_hook
+
+    saved_exception_hook = sys.excepthook
+    sys.excepthook = exception_hook
+
     display_mode = gtk.gdkgl.MODE_RGBA | gtk.gdkgl.MODE_DEPTH | gtk.gdkgl.MODE_DOUBLE | gtk.gdkgl.MODE_MULTISAMPLE
     events_mask = gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | gtk.gdk.KEY_PRESS_MASK | gtk.gdk.KEY_RELEASE_MASK
     glconfig = gtk.gdkgl.Config(mode=display_mode)
-    drawing_area = gtk.DrawingArea()
-    drawing_area.set_double_buffered(False)
-    drawing_area.glconfig = glconfig
-    drawing_area.gldrawable = None
-    drawing_area.glcontext = None
-    drawing_area.set_size_request(width, height)
-    drawing_area.add_events(events_mask)
-    return drawing_area
+    gda = gtk.DrawingArea()
+    gda.set_double_buffered(False)
+    gda.glconfig = glconfig
+    gda.gldrawable = None
+    gda.glcontext = None
+    gda.set_size_request(width, height)
+    gda.add_events(events_mask)
+    return gda
 
 
 def draw_line(point1, point2, color=(255, 255, 255, 255), width=2):

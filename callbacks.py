@@ -39,10 +39,9 @@ _redraw_timer = 20
 _timer_min_ms = 33
 
 
-def exception_hook(etype, evalue, etb):
-    saved_exception_hook(etype, evalue, etb)
-    print '%s:\n- Завершено из за возникновения исключения.' % __file__
-    quit(1)
+def on_key_callback(window, event, ui, user_module):
+      user_module.on_key_callback(window, event, ui)
+      return False
 
 
 def on_expose_event(gda, event, ui, user_module):
@@ -118,16 +117,16 @@ def on_realize(gda, ui, user_module):
     gda.gldrawable.gl_end()
 
 
-def on_timer_tick(gda, ui, user_module):
+def on_timer_tick(ui, user_module):
     global _redraw_timer, dt_timer_us, t_timer_us, _ms_new, _ms_prev
-    rect = gtk.gdk.Rectangle(0, 0, gda.allocation.width, gda.allocation.height)
-    gda.window.invalidate_rect(rect, True)
-    gda.window.process_updates(True)
+    rect = gtk.gdk.Rectangle(0, 0, ui.gda.allocation.width, ui.gda.allocation.height)
+    ui.gda.window.invalidate_rect(rect, True)
+    ui.gda.window.process_updates(True)
     _ms_new = int((dt_draw_us * 2) // 1000.0)
     if _ms_new < _timer_min_ms:
         _ms_new = _timer_min_ms
     _redraw_timer = _ms_new
     user_module.on_redraw_timer(ui, _ms_prev)
     _ms_prev = _ms_new
-    glib.timeout_add(_ms_new, on_timer_tick, gda, ui, user_module)
+    glib.timeout_add(_ms_new, on_timer_tick, ui, user_module)
     return False
