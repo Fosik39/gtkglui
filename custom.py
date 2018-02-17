@@ -54,7 +54,7 @@ def on_expose(*args):
     :param args:
     :return:
     """
-    for i in range(40):
+    for i in range(20):
         pos0 = 10, 20 + i * 20  # X and Y for line begin
         pos1 = 200, 20 + i * 20  # X and Y for line end
         color = (200, 200, 255, i * 20 + 30)  # Colors are: RGBA
