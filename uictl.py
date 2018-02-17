@@ -37,10 +37,8 @@ class UiCtl(object):
         self.events = dict()  # Свои события
         self.time_now = datetime.now()
         user_module = tools.load_module(module_path)
-        # Процедуры-обработчики инициализации, перерисовки и завершения
         self.gda.connect_after('realize', callbacks.on_realize, self, user_module)
         self.gda.connect('expose-event', callbacks.on_expose_event, self, user_module)
-        # Окно и главный цикл
         self.main_window = gtk.Window()
         self.main_window.set_reallocate_redraws(True)
         self.main_window.connect('delete-event', gtk.main_quit)
@@ -48,8 +46,6 @@ class UiCtl(object):
         self.main_window.connect('key-press-event', glwidgets.key_dispatcher)
         self.main_window.connect('key-press-event',  callbacks.on_key_callback, self, user_module)
         glib.timeout_add(25, callbacks.on_timer_tick, self, user_module)
-
-        # Расположение в окне
         vbox = gtk.VBox()
         self.main_window.add(vbox)
         vbox.pack_start(self.gda)
@@ -58,7 +54,6 @@ class UiCtl(object):
 
 
     def on_expose_event(self, event):
-        # Все управляемые элементы, компиляция в один display list
         if glwidgets.GlWidget.force_redraw:
             glNewList(self.dl, GL_COMPILE)
             for item in self.scene:
@@ -66,7 +61,6 @@ class UiCtl(object):
             glEndList()
             glwidgets.GlWidget.force_redraw = False
 
-        # Все управляемые элементы, рисование display list
         glCallList(self.dl)
 
         # Пользовательские процедуры рисования

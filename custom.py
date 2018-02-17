@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Опредеяемый пользователем модуль. Здесь можно добавлять свой код
+# User-defined module. Here you can add your own code
 
 import glwidgets
 import gltools
@@ -14,7 +14,7 @@ def init(*args):
 
 def on_realize(ui):
     """
-    Вызывается при инициализации. Создавай виджеты здесь
+    Is called during initialization. Create widgets here
     :param ui:
     :return:
     """
@@ -30,7 +30,7 @@ def on_btn1_clicked(btn1):
 
 def on_key_callback(*args):
     """
-    Вызывается при нажатии на клавиши. Обрабатывай события ввода здесь
+    Called when you press a key. Handle input events here
     :param args:
     :return:
     """
@@ -40,13 +40,18 @@ def on_key_callback(*args):
 
 def on_expose(*args):
     """
-    Вызывается для перерисовки окна.
-    Добавляйте код рисования использующий OpenGL API здесь
+    Is called to redraw the window. Add the
+    drawing code uses OpenGL API here. This
+    callback is assigned to custom draw purpose,
+    if you *really* need it.
     :param args:
     :return:
     """
     for i in range(40):
-        gltools.draw_line((10, 20 + i * 20), (200, 20 + i * 20), (200, 200, 255, i * 20 + 30))
+        pos0 = 10, 20 + i * 20  # X and Y for line begin
+        pos1 = 200, 20 + i * 20  # X and Y for line end
+        color = (200, 200, 255, i * 20 + 30)  # Colors are: RGBA
+        gltools.draw_line(pos0, pos1, color)  # Draw some nice line
 
 
 def on_redraw_timer(*args):

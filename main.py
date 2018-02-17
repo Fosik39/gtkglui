@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Пример использования gtkglui
+# An example of using gtkglui
 
-# Свои модули
+# Own modules
 import uictl
 
 
-# Создать окно для интерфейса
-# 1280, 720 - ширина и высота экраа
-# 'data' - папка с файлами изображений
-# 'custom' - файл питон-модуль, определяемый пользователем: custom.py
-# Смотри в 'custom.py' как добавить свои виджеты и всё остальное
+# Create the window for the interface
+# 1280, 720, width and height of the window
+# 'data' - folder with image files
+# 'custom' - Python file-user-defined module: custom.py
+# Look in 'custom.py' how to add your widgets and everything else
 ui = uictl.UiCtl(1280, 720, 'data', 'custom')
 
-# Главный цикл
+# Main loop
 ui.main()
 
 quit(0)
