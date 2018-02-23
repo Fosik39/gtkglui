@@ -276,7 +276,7 @@ class StaticText(GlWidget):
         self.parent_height = gda.allocation.height
         self.dl = glGenLists(1)
         self.text = text
-        self.color = color
+        self.color = list(color)
         self.user_data = user_data
         self.rdc = [GL_COMPILE_AND_EXECUTE]
         if font is None:
@@ -362,9 +362,12 @@ class PictureState(Picture):
 
 
 class Entry(GlWidget):
-    def __init__(self, gda, pos, text=' ', size=(150, 17), font_name=DEFAULT_FONT_FACE,
+    def __init__(self, gda, pos, text=' ',
+                 size=(150, DEFAULT_FONT_SIZE),
+                 font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE,
-                 text_color=(255, 255, 255, 127), bg_color=(255, 127, 127, 255)):
+                 text_color=(255, 255, 255, 127),
+                 bg_color=(255, 127, 127, 255)):
         assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert l_len(pos) == 2
@@ -390,8 +393,7 @@ class Entry(GlWidget):
         self.text = text.encode('utf-8')
         self.dl = glGenLists(1)
         self.ehid0 = None
-        self.ehid1 = None
-        self.ehid2 = self.gda.connect('button_press_event', self.on_button_press)
+        self.ehid2 = self.gda.connect('button_press_event', self._on_button_press)
         self.timer_id = None
         self.connect()
         self.cover = False
@@ -411,12 +413,12 @@ class Entry(GlWidget):
         pos = self.pos[0], self.pos[1]
         p0 = pos
         p1 = pos[0] + self.size[0], pos[1]
-        p2 = pos[0] + self.size[0], pos[1] + self.size[1]
-        p3 = pos[0], pos[1] + self.size[1]
+        p2 = pos[0] + self.size[0], pos[1] + self.size[1] + 2
+        p3 = pos[0], pos[1] + self.size[1] + 2
         gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, 1)
         pts = p1, p0, p3, p2
         # Подкладка
-        gltools.draw_polygon(pts, (0, 0, 0, 240))
+        gltools.draw_polygon(pts, self.bg_color)
         # Введённый текст
         self.font.draw_text((self.pos[0], self.pos[1] + self.size[1] + 2), self.text)
         # Курсор
@@ -424,23 +426,24 @@ class Entry(GlWidget):
         # Рамка
         glEndList()
 
-    def on_timer(self, *args):
+    def _on_timer(self, *args):
         # Смена фаз курсора
         self.cur_tick += 1
         self.cur_tick %= l_len(self.cur_colors)
         self.cur_col = self.cur_colors[self.cur_tick]
         return True
 
-    def on_button_press(self, event, *args):
+    def _on_button_press(self, event, *args):
         if self.cover:
             connect_key_handler(self.__on_key_press__)
+            if self.timer_id is None:
+                self.timer_id = glib.timeout_add(150, self._on_timer)
+                self.cur_tick = 0
         else:
-            self.cur_tick = 0
             if self.timer_id:
                 glib.source_remove(self.timer_id)
                 self.timer_id = None
-            if self.ehid1:
-                self.ehid1 = None
+                self.cur_tick = 0
         self.cur_pos = self.pos[0] + gltools.get_str_width(self.text[:self.cur_index], self.font_name, self.font_size)
 
     def __motion_notify__(self, *args):
@@ -513,7 +516,7 @@ class Entry(GlWidget):
             self.ehid0 = self.gda.connect('motion_notify_event', self.__motion_notify__)
         connect_key_handler(self.__on_key_press__)
         if self.timer_id is None:
-            self.timer_id = glib.timeout_add(150, self.on_timer)
+            self.timer_id = glib.timeout_add(150, self._on_timer)
         self.cur_pos = self.pos[0]
         self.cur_index = 0
 
@@ -522,8 +525,6 @@ class Entry(GlWidget):
         if self.ehid0:
             self.gda.disconnect(self.ehid0)
             self.ehid0 = None
-        if self.ehid1:
-            self.ehid1 = None
         if self.timer_id:
             glib.source_remove(self.timer_id)
             self.timer_id = None
@@ -1336,9 +1337,8 @@ class TextRegulator(StaticText):
     Ввод данных движением мыши
     """
 
-    def __init__(self, gda, pos=(0, 0), fmt='%03f', val_min=0, val_max=100, val=50, size=(40, DEFAULT_FONT_SIZE),
-                 scale=0.01,
-                 axis=1, font=None, color=(255, 255, 255, 150), user_proc=None, user_data=None):
+    def __init__(self, gda, pos=(0, 0), fmt='%.2f', val_min=0, val_max=100, val=50, size=(40, DEFAULT_FONT_SIZE),
+                 scale=0.01, axis=1, font=None, color=[255, 255, 255, 180], user_proc=None, user_data=None):
         """
         :param gda: Контекст gtk-opengl
         :param pos: Координаты на экране в пикселях
@@ -1354,8 +1354,8 @@ class TextRegulator(StaticText):
         :param user_data: Данные пользователя
         :return:
         """
-        assert type(color) is tuple  # Цвет должен состоять из четырёх компонент в кортеже
-        assert l_len(color) == 4  # Цвет должен состоять из четырёх компонент в кортеже
+        assert type(color) is list  # Цвет должен состоять из четырёх компонент в списке
+        assert l_len(color) == 4  # Цвет должен состоять из четырёх компонент в списке
         for c in color:
             assert type(c) is int  # Значение цвета должно быть целым
             assert 0 <= c <= 255  # Значение цвета должно быть от 0 до 255 включительно
@@ -1364,7 +1364,7 @@ class TextRegulator(StaticText):
         assert l_len(pos) == 2
         assert type(pos[0]) is int
         assert type(pos[1]) is int
-        assert type(fmt) is str
+        #assert type(fmt) is str
         assert type(axis) is int
         assert 0 <= axis <= 1  # 0 - ось X, 1 - ось Y
         assert type(size) is tuple
@@ -1402,8 +1402,7 @@ class TextRegulator(StaticText):
                 self.ehid2 = self.drawing_area.connect('button-release-event', self.__button_release__)
             self.prev = pos[self.axis]
             self.text = self.get_text()
-            r, g, b, a = self.color
-            self.color = r, g, b, 210
+            self.color[3] = 250
 
     def __button_release__(self, *args):
         if self.ehid1 is not None:
@@ -1411,8 +1410,7 @@ class TextRegulator(StaticText):
             self.ehid1 = None
             self.prev = self.pos[self.axis]
             self.text = self.get_text()
-            r, g, b, a = self.color
-            self.color = r, g, b, 180
+            self.color[3] = 180
         if self.ehid2 is not None:
             self.drawing_area.disconnect(self.ehid2)
             self.ehid2 = None
@@ -1474,6 +1472,7 @@ class CairoGlFont(object):
             gltools.draw_texture(txr, (0, 0))
             glEndList()
             self.sd[ks] = [dl, width, height, txrid]
+        raise BaseException('%s.CairoGlFont: Not implemented yet.' % __file__)
 
     def draw_text(self, pos, text, color):
         x, y = pos

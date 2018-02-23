@@ -26,6 +26,16 @@ def on_realize(ui):
     tbl1.show()
     ui.scene.append(tbl1)
 
+    font1 = glwidgets.GlFont('Liberation Serif', 55)
+    txt = glwidgets.StaticText(ui.gda, (220, 250), 'Static Text with\nline separator, e.g. \nwith \'\\n\' symbols', font1, color=(255, 127, 63, 255))
+    ui.scene.append(txt)
+
+    reg1 = glwidgets.TextRegulator(ui.gda, (30, 140), fmt=u'%0.3f\u2190Click and\nmove up and down')
+    ui.scene.append(reg1)
+
+    entry1 = glwidgets.Entry(ui.gda, (400, 10), 'type here')
+    ui.scene.append(entry1)
+
     # Also, instead of using ui.scene.append(), you can add new items
     # to the scene with this maner: ui.scene += [btn1, tbl1]
 
@@ -45,20 +55,20 @@ def on_key_callback(*args):
     :param args:
     :return:
     """
-    print 'on_key_callback():', args
+    #print 'on_key_callback():', args
     return False
 
 
 def on_expose(*args):
     """
-    Is called to redraw the window. Add the
+    Called to redraw the window. Add the
     drawing code that uses OpenGL API here. This
     callback is assigned to custom draw purpose,
     if you *really* need it.
     :param args:
     :return:
     """
-    for i in range(20):
+    for i in range(12):
         pos0 = 10, 20 + i * 20  # X and Y for line begin
         pos1 = 200, 20 + i * 20  # X and Y for line end
         color = (200, 200, 255, i * 20 + 30)  # Colors are: RGBA
@@ -66,4 +76,9 @@ def on_expose(*args):
 
 
 def on_redraw_timer(*args):
+    """
+    Called to custom animations when redraw timer is fired
+    :param args:
+    :return:
+    """
     pass
