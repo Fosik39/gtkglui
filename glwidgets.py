@@ -363,7 +363,7 @@ class PictureState(Picture):
 
 class Entry(GlWidget):
     def __init__(self, gda, pos, text=' ',
-                 size=(150, DEFAULT_FONT_SIZE),
+                 rect_size=(150, DEFAULT_FONT_SIZE),
                  font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE,
                  text_color=(255, 255, 255, 255),
@@ -371,8 +371,8 @@ class Entry(GlWidget):
         assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert l_len(pos) == 2
-        assert type(size) is tuple
-        assert l_len(size) == 2
+        assert type(rect_size) is tuple
+        assert l_len(rect_size) == 2
         assert type(font_name) is str
         assert type(font_size) is int
         assert type(text_color) is tuple
@@ -389,7 +389,7 @@ class Entry(GlWidget):
         self.bg_color = bg_color
         self.font = GlFont(font_name, font_size)
         self.pos = pos
-        self.size = size
+        self.rect_size = rect_size
         self.text = text.encode('utf-8')
         self.dl = glGenLists(1)
         self.ehid0 = None
@@ -412,17 +412,17 @@ class Entry(GlWidget):
         glNewList(self.dl, GL_COMPILE)
         pos = self.pos[0], self.pos[1]
         p0 = pos
-        p1 = pos[0] + self.size[0], pos[1]
-        p2 = pos[0] + self.size[0], pos[1] + self.size[1] + 2
-        p3 = pos[0], pos[1] + self.size[1] + 2
+        p1 = pos[0] + self.rect_size[0], pos[1]
+        p2 = pos[0] + self.rect_size[0], pos[1] + self.rect_size[1] + 2
+        p3 = pos[0], pos[1] + self.rect_size[1] + 2
         gltools.draw_lines((p0, p1, p2, p3, p0), self.bg_color, 1)
         pts = p1, p0, p3, p2
         # Подкладка
         gltools.draw_polygon(pts, self.bg_color)
         # Введённый текст
-        self.font.draw_text((self.pos[0], self.pos[1] + self.size[1] + 2), self.text)
+        self.font.draw_text((self.pos[0], self.pos[1] + self.rect_size[1] + 2), self.text)
         # Курсор
-        gltools.draw_line((self.cur_pos, self.pos[1] + self.size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
+        gltools.draw_line((self.cur_pos, self.pos[1] + self.rect_size[1]), (self.cur_pos, self.pos[1]), self.cur_col)
         # Рамка
         glEndList()
 
@@ -444,11 +444,12 @@ class Entry(GlWidget):
                 glib.source_remove(self.timer_id)
                 self.timer_id = None
                 self.cur_tick = 0
+        self.cur_col = self.cur_colors[self.cur_tick]
         self.cur_pos = self.pos[0] + gltools.get_str_width(self.text[:self.cur_index], self.font_name, self.font_size)
 
     def _motion_notify(self, *args):
         event = args[1]
-        self.cover = tools.check_rect(self.size[0], self.size[1], self.pos, event.x, event.y)
+        self.cover = tools.check_rect(self.rect_size[0], self.rect_size[1], self.pos, event.x, event.y)
         col = self.text_color
         self.text_color = col[0], col[1], col[2], 100 + 100 * self.cover
         return False
@@ -505,7 +506,7 @@ class Entry(GlWidget):
         s0 = tools.str_cut(self.text, self.cur_index)
         self.cur_pos = self.pos[0] + self.font.get_text_width(s0)
         text_right_x = self.pos[0] + self.font.get_text_width(self.text)
-        if (text_right_x >= self.pos[0] + self.size[0]) and (char_code != 0):
+        if (text_right_x >= self.pos[0] + self.rect_size[0]) and (char_code != 0):
             self.text = save_text
             self.cur_index = save_cur_index
             self.cur_pos = save_cur_pos
