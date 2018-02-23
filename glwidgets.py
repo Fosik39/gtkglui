@@ -366,8 +366,8 @@ class Entry(GlWidget):
                  size=(150, DEFAULT_FONT_SIZE),
                  font_name=DEFAULT_FONT_FACE,
                  font_size=DEFAULT_FONT_SIZE,
-                 text_color=(255, 255, 255, 127),
-                 bg_color=(255, 127, 127, 255)):
+                 text_color=(255, 255, 255, 255),
+                 bg_color=(30, 70, 127, 255)):
         assert type(gda) is gtk.DrawingArea
         assert type(pos) is tuple
         assert l_len(pos) == 2
