@@ -10,7 +10,7 @@ import gltools
 
 def on_realize(ui):
     """
-    Is called during initialization. Create widgets *here only*
+    Called during initialization. Create your widgets *here only*
     :param ui:
     :return: None
     """
