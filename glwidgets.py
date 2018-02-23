@@ -435,7 +435,7 @@ class Entry(GlWidget):
 
     def _on_button_press(self, event, *args):
         if self.cover:
-            connect_key_handler(self.__on_key_press__)
+            connect_key_handler(self._on_key_press)
             if self.timer_id is None:
                 self.timer_id = glib.timeout_add(150, self._on_timer)
                 self.cur_tick = 0
@@ -446,14 +446,14 @@ class Entry(GlWidget):
                 self.cur_tick = 0
         self.cur_pos = self.pos[0] + gltools.get_str_width(self.text[:self.cur_index], self.font_name, self.font_size)
 
-    def __motion_notify__(self, *args):
+    def _motion_notify(self, *args):
         event = args[1]
         self.cover = tools.check_rect(self.size[0], self.size[1], self.pos, event.x, event.y)
         col = self.text_color
         self.text_color = col[0], col[1], col[2], 100 + 100 * self.cover
         return False
 
-    def __on_key_press__(self, window, event):
+    def _on_key_press(self, window, event):
         # Сохранить состояние, на случай если изменения будут не допустимыми
         save_text = copy.deepcopy(self.text)
         save_cur_index = self.cur_index
@@ -513,8 +513,8 @@ class Entry(GlWidget):
 
     def connect(self):
         if self.ehid0 is None:
-            self.ehid0 = self.gda.connect('motion_notify_event', self.__motion_notify__)
-        connect_key_handler(self.__on_key_press__)
+            self.ehid0 = self.gda.connect('motion_notify_event', self._motion_notify)
+        connect_key_handler(self._on_key_press)
         if self.timer_id is None:
             self.timer_id = glib.timeout_add(150, self._on_timer)
         self.cur_pos = self.pos[0]

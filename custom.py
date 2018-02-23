@@ -55,7 +55,7 @@ def on_key_callback(*args):
     :param args:
     :return:
     """
-    #print 'on_key_callback():', args
+    print 'on_key_callback():', args
     return False
 
 
