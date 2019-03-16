@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Обратные вызовы gtk
-# - отработка завершения при исключении
-# - рисование по событию и таймеру
-# - таймер обновления экрана
-# - отработка инициализации gtk-opengl
-# - отработка клавиши esc - завершение программы
-# - глобальный обработчик нажатий на клавиатуру
+# Callbacks for gtk
+# - workaround for exceptions
+# - redraw for timer and events
+# - screen refresh timer
+# - initialization gtk-opengl
+# - workaround esc key - program cancelation
+# - global keyboard handler
 
 
-# Чужие модули
+# Foren modules
 import gc
 import gtk
 import gtk.gdkgl
@@ -22,7 +22,7 @@ OpenGL.ERROR_CHECKING = False
 OpenGL.ERROR_LOGGING = False
 from OpenGL.GL import *
 
-# Свои модули
+# Native modules
 import glwidgets
 import gltools
 import tools
@@ -47,20 +47,19 @@ def on_key_callback(window, event, ui, user_module):
 def on_expose_event(gda, event, ui, user_module):
     global dt_draw_us, t_us, flash_alpha
 
-    # Контроль времени перерисовки
+    # Monitor redraw time
     t0_us = datetime.now().microsecond
 
-    # GTK начало рисования в контексте OpenGL
-    # gda.gldrawable.wait_gdk()
+    # GTK begin draw in OpenGL context
     gda.gldrawable.gl_begin(gda.glcontext)
 
     if _quit_flag:
         ui.uninit()
         glDeleteTextures(gltools.__textures__)
-        # Контроль ошибок OpenGL
+        # Error handling in OpenGL
         gltools.check_glerrors('on_expose_event')
         gda.window.unset_gl_capability()
-        # Завершение контекста OpenGL
+        # OpenGL context cancelation
         gda.gldrawable.wait_gl()
         gda.gldrawable.swap_buffers()
         gda.gldrawable.gl_end()
@@ -69,29 +68,29 @@ def on_expose_event(gda, event, ui, user_module):
         gc.collect()
         gtk.main_quit()
 
-    # Обновить мигающий цвет
+    # Update flashing light
     gltools.step_flash()
 
-    # Рисование в OpenGL
+    # Direct OpenGL draw
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    # Перерисовка обновившихся виджетов (компиляция display lists)
+    # Redraw widgets if needed (display lists compilation)
     glwidgets.redraw_queue()
 
     ui.on_expose_event(event)
     user_module.on_expose(ui, event)
 
-    # Контроль ошибок OpenGL
+    # Error handling
     gltools.check_glerrors('on_expose_event()')
 
-    # Завершение контекста OpenGL
+    # Switch out from OpenGL context
     if gda.gldrawable:
         gda.gldrawable.swap_buffers()
         gda.gldrawable.gl_end()
 
     ui.time_now = datetime.now()
 
-    # Контроль времени перерисовки
+    # Monitor redraw time
     t1_us = ui.time_now.microsecond
     dt_draw_us = tools.delta_tick(t0_us, t1_us, 999999)
 
@@ -107,7 +106,7 @@ def on_realize(gda, ui, user_module):
     gda.gldrawable.wait_gdk()
     gda.gldrawable.gl_begin(gda.glcontext)
 
-    # Своя инициализация
+    # Initialization
     gltools.init(gda)
     ui.init()
     user_module.on_realize(ui)
@@ -118,6 +117,8 @@ def on_realize(gda, ui, user_module):
 
 
 def on_timer_tick(ui, user_module):
+    # Make a trick with go ahead redraw timer: low down refresh rate,
+    # if redraw timer fired before redraw procedure complits.
     global _redraw_timer, dt_timer_us, t_timer_us, _ms_new, _ms_prev
     rect = gtk.gdk.Rectangle(0, 0, ui.gda.allocation.width, ui.gda.allocation.height)
     ui.gda.window.invalidate_rect(rect, True)
